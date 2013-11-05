@@ -46,17 +46,17 @@ def parse_config():
     return settings
 
 
-def get_datacenter():
-    ''' Obtain the datacenter from the xenstore. '''
+def get_region():
+    ''' Obtain the region from the xenstore. '''
     xencmd = ['xenstore-read', 'vm-data/provider_data/region']
-    datacenter = subprocess.check_output(xencmd).rstrip('\n')
-    return datacenter
+    region = subprocess.check_output(xencmd).rstrip('\n')
+    return region
 
 
 def query_api(settings):
-    '''  '''
-    apiurl = 'https://{DC}.{DOMAIN}/{VERSION}/{INFO}'.format(
-        DC=get_datacenter(),
+    ''' Query the Rackconnect API to see if automation is complete. '''
+    apiurl = 'https://{REGION}.{DOMAIN}/{VERSION}/{INFO}'.format(
+        REGION=get_region(),
         DOMAIN='api.rackconnect.rackspace.com',
         VERSION='v1',
         INFO='automation_status')
