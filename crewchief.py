@@ -55,18 +55,23 @@ def get_region():
 
 def query_api(settings):
     ''' Query the Rackconnect API to see if automation is complete. '''
+    # pull our settings from the dictionary
+    max_api_attempts = settings.get('max_api_attempts')
+    api_wait_seconds = settings.get('api_wait_seconds')
+    # construct the endpoint url
     apiurl = 'https://{REGION}.{DOMAIN}/{VERSION}/{INFO}'.format(
         REGION=get_region(),
         DOMAIN='api.rackconnect.rackspace.com',
         VERSION='v1',
         INFO='automation_status')
-    for each in range(settings.get('max_api_attempts')):
+    # loop the API call until done or max attempts
+    for each in range(max_api_attempts):
         try:
             rcstatus = requests.get(apiurl, timeout=3).text
         except requests.exceptions.Timeout:
             syslog.syslog('rackconnect API call timeout, '
                           'sleeping 60 seconds')
-            time.sleep(settings.get('api_wait_seconds'))
+            time.sleep(api_wait_seconds)
             continue
         else:
             if rcstatus == 'DEPLOYED':
@@ -75,7 +80,7 @@ def query_api(settings):
             else:
                 syslog.syslog('rackconnect automation not yet complete, '
                               ' sleeping 60 seconds')
-                time.sleep(settings.get('api_wait_seconds'))
+                time.sleep(api_wait_seconds)
                 continue
     else:
         syslog.syslog('hit max api attempts, giving up')
