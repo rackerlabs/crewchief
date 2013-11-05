@@ -68,7 +68,7 @@ def query_api(settings):
     # loop the API call until done or max attempts
     for each in range(int(max_api_attempts)):
         try:
-            rcstatus = requests.get(apiurl, timeout=3).text
+            rcstatus = requests.get(apiurl, timeout=3).content
         except requests.exceptions.Timeout:
             syslog.syslog('rackconnect API call timeout, '
                           '{}'.format(sleepmsg))
