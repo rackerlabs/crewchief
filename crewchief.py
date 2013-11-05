@@ -24,7 +24,7 @@ import ConfigParser
 
 
 def parse_config():
-    ''' Obtain the user settings from /etc/crewchief/crewchief.conf. '''
+    ''' obtain the user settings from /etc/crewchief/crewchief.conf '''
     # parse the config file
     config = ConfigParser.ConfigParser()
     config.read('/etc/crewchief/crewchief.conf')
@@ -47,14 +47,14 @@ def parse_config():
 
 
 def get_region():
-    ''' Obtain the region from the xenstore. '''
+    ''' obtain the region from the xenstore '''
     xencmd = ['xenstore-read', 'vm-data/provider_data/region']
     region = subprocess.check_output(xencmd).rstrip('\n')
     return region
 
 
 def query_api(settings):
-    ''' Query the Rackconnect API to see if automation is complete. '''
+    ''' query the Rackconnect API to see if automation is complete '''
     # pull our settings from the dictionary
     max_api_attempts = settings.get('max_api_attempts')
     api_wait_seconds = settings.get('api_wait_seconds')
@@ -88,7 +88,7 @@ def query_api(settings):
 
 
 def get_tasks(settings):
-    '''  '''
+    ''' obtain the list of scripts from /etc/crewchief/tasks.d '''
     tasks_dir = '/etc/crewchief/tasks.d'
     scripts = glob.glob('{}/*'.format(tasks_dir))
     try:
@@ -100,7 +100,7 @@ def get_tasks(settings):
 
 
 def call_tasks(scripts):
-    '''  '''
+    ''' run the scripts from the input list '''
     for script in scripts:
         try:
             subprocess.check_call(script)
