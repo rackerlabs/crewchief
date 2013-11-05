@@ -66,7 +66,7 @@ def query_api(settings):
         VERSION='v1',
         INFO='automation_status')
     # loop the API call until done or max attempts
-    for each in range(max_api_attempts):
+    for each in range(int(max_api_attempts)):
         try:
             rcstatus = requests.get(apiurl, timeout=3).text
         except requests.exceptions.Timeout:
