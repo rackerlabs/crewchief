@@ -58,7 +58,7 @@ def query_api(settings):
     # pull our settings from the dictionary
     max_api_attempts = settings.get('max_api_attempts')
     api_wait_seconds = settings.get('api_wait_seconds')
-    sleepmsg = 'sleeping {TIME} seconds'.format(TIME=api_wait_seconds)
+    sleepmsg = 'sleeping {} seconds'.format(api_wait_seconds)
     # construct the endpoint url
     apiurl = 'https://{REGION}.{DOMAIN}/{VERSION}/{INFO}'.format(
         REGION=get_region(),
@@ -71,7 +71,7 @@ def query_api(settings):
             rcstatus = requests.get(apiurl, timeout=3).text
         except requests.exceptions.Timeout:
             syslog.syslog('rackconnect API call timeout, '
-                          '{MSG}'.format(MSG=sleepmsg))
+                          '{}'.format(sleepmsg))
             time.sleep(api_wait_seconds)
             continue
         else:
@@ -79,8 +79,8 @@ def query_api(settings):
                 syslog.syslog('rackconnect automation complete')
                 return True
             else:
-                syslog.syslog('rackconnect automation not yet complete, '
-                              '{MSG}'.format(MSG=sleepmsg))
+                syslog.syslog('rackconnect automation not yet '
+                              'complete, {}'.format(sleepmsg))
                 time.sleep(api_wait_seconds)
                 continue
     else:
@@ -91,9 +91,9 @@ def query_api(settings):
 def get_tasks(settings):
     ''' obtain the list of scripts from /etc/crewchief/tasks.d '''
     tasks_dir = '/etc/crewchief/tasks.d'
-    scripts = glob.glob('{DIR}/*'.format(DIR=tasks_dir))
+    scripts = glob.glob('{}/*'.format(tasks_dir))
     try:
-        scripts.remove('{DIR}/README'.format(DIR=tasks_dir))
+        scripts.remove('{}/README'.format(tasks_dir))
     except ValueError:
         pass
     scripts.sort()
@@ -106,15 +106,12 @@ def call_tasks(scripts):
         try:
             subprocess.check_call(script)
         except OSError:
-            syslog.syslog('skipping non-executable file {SCRIPT}'.format(
-                SCRIPT=script))
+            syslog.syslog('skipping non-executable file {}'.format(script))
         except subprocess.CalledProcessError as e:
-            syslog.syslog('{SCRIPT} exited with a status of {CODE}'.format(
-                SCRIPT=script,
-                CODE=e.returncode))
+            syslog.syslog('{} exited with a status of {}'.format(
+                script, e.returncode))
         else:            
-            syslog.syslog('successfully ran {SCRIPT}'.format(
-                SCRIPT=script))
+            syslog.syslog('successfully ran {}'.format(script))
     else:
         syslog.syslog('completed all tasks')
 
