@@ -58,6 +58,7 @@ def query_api(settings):
     # pull our settings from the dictionary
     max_api_attempts = settings.get('max_api_attempts')
     api_wait_seconds = settings.get('api_wait_seconds')
+    sleepmsg = 'sleeping {} seconds'.format(api_wait_seconds)
     # construct the endpoint url
     apiurl = 'https://{REGION}.{DOMAIN}/{VERSION}/{INFO}'.format(
         REGION=get_region(),
@@ -70,7 +71,7 @@ def query_api(settings):
             rcstatus = requests.get(apiurl, timeout=3).text
         except requests.exceptions.Timeout:
             syslog.syslog('rackconnect API call timeout, '
-                          'sleeping 60 seconds')
+                          '{}'.format(sleepmsg))
             time.sleep(api_wait_seconds)
             continue
         else:
@@ -79,7 +80,7 @@ def query_api(settings):
                 return True
             else:
                 syslog.syslog('rackconnect automation not yet complete, '
-                              ' sleeping 60 seconds')
+                              '{}'.format(sleepmsg))
                 time.sleep(api_wait_seconds)
                 continue
     else:
