@@ -28,20 +28,20 @@ def parse_config():
     # parse the config file
     config = ConfigParser.ConfigParser()
     config.read('/etc/crewchief/crewchief.conf')
-    # quit if the file is malformed or missing
+    # log a warning if the file is malformed or missing
     if 'settings' not in config.sections():
-        syslog.syslog('malformed or missing configuration file')
-        sys.exit(1)
+        syslog.syslog('malformed or missing configuration file, '
+                      'using default values')
     # set the defaults
-    settings = {}
-    settings['max_api_attempts'] = 10
-    settings['api_wait_seconds'] = 60
+    defaults = {'max_api_attempts': 10,
+                'api_wait_seconds': 60}
     # overwrite the defaults with values from config file
-    for each in ['max_api_attempts', 'api_wait_seconds']:
+    settings = {}
+    for each in defaults.keys():
         try:
             settings[each] = config.get('settings', each)
-        except ConfigParser.NoOptionError:
-            pass
+        except (ConfigParser.NoOptionError, ConfigParser.NoSectionError):
+            settings[each] = defaults[each]
     # return our settings dictionary
     return settings
 
