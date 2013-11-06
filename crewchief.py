@@ -110,7 +110,7 @@ def call_tasks(scripts):
         except subprocess.CalledProcessError as e:
             syslog.syslog('{} exited with a status of {}'.format(
                 script, e.returncode))
-        else:            
+        else:
             syslog.syslog('successfully ran {}'.format(script))
     else:
         syslog.syslog('completed all tasks')
