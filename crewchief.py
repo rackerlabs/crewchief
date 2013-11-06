@@ -111,15 +111,16 @@ def get_tasks(settings):
 def call_tasks(scripts):
     ''' run the scripts from the input list '''
     for script in scripts:
+        scriptname = os.path.basename(script)
         try:
-            subprocess.check_call(script)
+            status = subprocess.call(script)
         except OSError:
-            log('skipping non-executable file {}'.format(script))
-        except subprocess.CalledProcessError as e:
-            log('{} exited with a status of {}'.format(
-                script, e.returncode))
+            log('task {} skipped'.format(scriptname))
         else:
-            log('successfully ran {}'.format(script))
+            if status == 0:
+                log('task {} completed'.format(scriptname))
+            else:
+                log('task {} failed {}'.format(scriptname, status))
     else:
         log('completed all tasks')
 
