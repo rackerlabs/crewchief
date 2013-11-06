@@ -4,13 +4,13 @@
 # Description:  This script is run at boot in a Rackconnected
 #               cloud server.  It will continue to run until
 #               Rackconnect automation is complete, then it will
-#               launch the scripts inside /etc/crewchief.d/.
+#               execute the files in /etc/crewchief/tasks.d/.
 #
-
-#
-# Filelist:     /etc/crewchief/
+# Filelist:     /usr/share/crewchief/crewchief.py (this file)
+#               /etc/crewchief/
 #               /etc/crewchief/crewchief.conf
 #               /etc/crewchief/tasks.d/
+#               /etc/crewchief/tasks.d/README
 #
 
 import os
