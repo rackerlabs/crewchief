@@ -8,7 +8,7 @@
 #
 # Filelist:     /usr/share/crewchief/crewchief.py (this file)
 #               /etc/crewchief/
-#               /etc/crewchief/crewchief.conf
+#               /etc/crewchief/crewchief.ini
 #               /etc/crewchief/tasks.d/
 #               /etc/crewchief/tasks.d/README
 #
@@ -27,10 +27,10 @@ except ImportError:
     import configparser
 
 def parse_config():
-    ''' obtain the user settings from /etc/crewchief/crewchief.conf '''
+    ''' obtain the user settings from crewchief.ini '''
     # parse the config file
     config = ConfigParser.ConfigParser()
-    config.read('/etc/crewchief/crewchief.conf')
+    config.read('/etc/crewchief/crewchief.ini')
     # set the defaults
     settings = {'max_api_attempts': 10,
                 'api_wait_seconds': 60}
