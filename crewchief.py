@@ -19,9 +19,12 @@ import time
 import glob
 import requests
 import subprocess
-import ConfigParser
 from syslog import syslog as log
 
+try:
+    import ConfigParser
+except ImportError:
+    import configparser
 
 def parse_config():
     ''' obtain the user settings from /etc/crewchief/crewchief.conf '''
