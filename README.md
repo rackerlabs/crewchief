@@ -4,7 +4,9 @@ Launch scripts after Rackconnect automation is complete.  All events are logged 
 
 ## boot time script
 
-```/usr/share/crewchief/crewchief.py```
+```
+/usr/share/crewchief/crewchief.py
+```
 
 ## configuration
 
