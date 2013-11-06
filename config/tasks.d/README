@@ -2,4 +2,4 @@ RACKCONNECT CREWCHIEF
 
 During boot, crewchief will check the Rackconnect automation status.
 Once that is complete, it will execute the files in this directory.
-You can enable/disable files in this directory by changing the executable flag.
+You can enable/disable files by changing the executable flag.
