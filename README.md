@@ -24,3 +24,17 @@ api_wait_seconds = 60
 ```
 /etc/crewchief/tasks.d
 ```
+
+## tasks readme
+
+```
+/etc/crewchief/tasks.d/README
+```
+
+```
+RACKCONNECT CREWCHIEF
+
+During boot, crewchief will check the Rackconnect automation status.
+Once that is complete, it will execute the files in this directory.
+You can enable/disable files in this directory by changing the executable flag.
+```
