@@ -6,12 +6,6 @@
 #               Rackconnect automation is complete, then it will
 #               execute the files in /etc/crewchief/tasks.d/.
 #
-# Filelist:     /usr/share/crewchief/crewchief.py (this file)
-#               /etc/crewchief/
-#               /etc/crewchief/crewchief.ini
-#               /etc/crewchief/tasks.d/
-#               /etc/crewchief/tasks.d/README
-#
 
 import os
 import sys
