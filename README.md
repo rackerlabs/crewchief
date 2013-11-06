@@ -11,7 +11,7 @@ Launch scripts after Rackconnect automation is complete.  All events are logged 
 ## configuration
 
 ```
-/etc/crewchief/crewchief.conf
+/etc/crewchief/crewchief.ini
 ```
 ```ini
 [main]
