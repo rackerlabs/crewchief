@@ -17,10 +17,10 @@ import os
 import sys
 import time
 import glob
-import syslog
 import requests
 import subprocess
 import ConfigParser
+from syslog import syslog as log
 
 
 def parse_config():
@@ -28,20 +28,25 @@ def parse_config():
     # parse the config file
     config = ConfigParser.ConfigParser()
     config.read('/etc/crewchief/crewchief.conf')
-    # log a warning if the file is malformed or missing
-    if 'settings' not in config.sections():
-        syslog.syslog('malformed or missing configuration file, '
-                      'using default values')
     # set the defaults
-    defaults = {'max_api_attempts': 10,
+    settings = {'max_api_attempts': 10,
                 'api_wait_seconds': 60}
-    # overwrite the defaults with values from config file
-    settings = {}
-    for each in defaults.keys():
-        try:
-            settings[each] = config.get('settings', each)
-        except (ConfigParser.NoOptionError, ConfigParser.NoSectionError):
-            settings[each] = defaults[each]
+    try:
+        for each in config.options('main'):
+            # test if the config option is a valid key
+            if each in settings.keys():
+                try:
+                    # overwrite the default setting to the one from config
+                    settings[each] = config.getint('main', each)
+                except ValueError:
+                    # not an interger, use the default
+                    log('{}: invalid value, using default'.format(each))
+            else:
+                # the option is bogus
+                log('{}: invalid option'.format(each))
+    except ConfigParser.NoSectionError:
+        # the file is malformed or missing
+        log('malformed or missing configuration file, using defaults')
     # return our settings dictionary
     return settings
 
@@ -70,21 +75,21 @@ def query_api(settings):
         try:
             rcstatus = requests.get(apiurl, timeout=3).content
         except requests.exceptions.Timeout:
-            syslog.syslog('rackconnect API call timeout, '
+            log('rackconnect API call timeout, '
                           '{}'.format(sleepmsg))
             time.sleep(api_wait_seconds)
             continue
         else:
             if rcstatus == 'DEPLOYED':
-                syslog.syslog('rackconnect automation complete')
+                log('rackconnect automation complete')
                 return True
             else:
-                syslog.syslog('rackconnect automation not yet '
+                log('rackconnect automation not yet '
                               'complete, {}'.format(sleepmsg))
                 time.sleep(api_wait_seconds)
                 continue
     else:
-        syslog.syslog('hit max api attempts, giving up')
+        log('hit max api attempts, giving up')
         return False
 
 
@@ -106,14 +111,14 @@ def call_tasks(scripts):
         try:
             subprocess.check_call(script)
         except OSError:
-            syslog.syslog('skipping non-executable file {}'.format(script))
+            log('skipping non-executable file {}'.format(script))
         except subprocess.CalledProcessError as e:
-            syslog.syslog('{} exited with a status of {}'.format(
+            log('{} exited with a status of {}'.format(
                 script, e.returncode))
         else:
-            syslog.syslog('successfully ran {}'.format(script))
+            log('successfully ran {}'.format(script))
     else:
-        syslog.syslog('completed all tasks')
+        log('completed all tasks')
 
 
 def main():
