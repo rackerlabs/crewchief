@@ -1,12 +1,5 @@
 #!/usr/bin/env python2
 
-#
-# Description:  This script is run at boot in a Rackconnected
-#               cloud server.  It will continue to run until
-#               Rackconnect automation is complete, then it will
-#               execute the files in /etc/crewchief/tasks.d/.
-#
-
 import os
 import sys
 import time
