@@ -14,11 +14,11 @@ import glob
 import requests
 import subprocess
 from syslog import syslog as log
-
 try:
     import ConfigParser
 except ImportError:
     import configparser
+
 
 def parse_config():
     ''' obtain the user settings from crewchief.ini '''
@@ -72,8 +72,7 @@ def query_api(settings):
         try:
             rcstatus = requests.get(apiurl, timeout=3).content
         except requests.exceptions.Timeout:
-            log('rackconnect API call timeout, '
-                          '{}'.format(sleepmsg))
+            log('rackconnect API call timeout, {}'.format(sleepmsg))
             time.sleep(api_wait_seconds)
             continue
         else:
@@ -81,8 +80,7 @@ def query_api(settings):
                 log('rackconnect automation complete')
                 return True
             else:
-                log('rackconnect automation not yet '
-                              'complete, {}'.format(sleepmsg))
+                log('rackconnect automation incomplete, {}'.format(sleepmsg))
                 time.sleep(api_wait_seconds)
                 continue
     else:
