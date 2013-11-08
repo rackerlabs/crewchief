@@ -44,10 +44,10 @@ def parse_config():
                     settings[each] = config.getint('main', each)
                 except ValueError:
                     # not an interger, use the default
-                    log('{}: invalid value, using default'.format(each))
+                    log('{0}: invalid value, using default'.format(each))
             else:
                 # the option is bogus
-                log('{}: invalid option'.format(each))
+                log('{0}: invalid option'.format(each))
     except configparser.NoSectionError:
         # the file is malformed or missing
         log('malformed or missing configuration file, using defaults')
@@ -67,7 +67,7 @@ def query_api(settings):
     # pull our settings from the dictionary
     max_api_attempts = settings.get('max_api_attempts')
     api_wait_seconds = settings.get('api_wait_seconds')
-    sleepmsg = 'sleeping {} seconds'.format(api_wait_seconds)
+    sleepmsg = 'sleeping {0} seconds'.format(api_wait_seconds)
     # construct the endpoint url
     apiurl = 'https://{REGION}.{DOMAIN}/{VERSION}/{INFO}'.format(
         REGION=get_region(),
@@ -79,7 +79,7 @@ def query_api(settings):
         try:
             rcstatus = requests.get(apiurl, timeout=3).content
         except requests.exceptions.Timeout:
-            log('rackconnect API call timeout, {}'.format(sleepmsg))
+            log('rackconnect API call timeout, {0}'.format(sleepmsg))
             time.sleep(api_wait_seconds)
             continue
         else:
@@ -87,7 +87,7 @@ def query_api(settings):
                 log('rackconnect automation complete')
                 return True
             else:
-                log('rackconnect automation incomplete, {}'.format(sleepmsg))
+                log('rackconnect automation incomplete, {0}'.format(sleepmsg))
                 time.sleep(api_wait_seconds)
                 continue
     else:
@@ -98,9 +98,9 @@ def query_api(settings):
 def get_tasks(settings):
     ''' obtain the list of scripts from /etc/crewchief/tasks.d '''
     tasks_dir = '/etc/crewchief/tasks.d'
-    scripts = glob.glob('{}/*'.format(tasks_dir))
+    scripts = glob.glob('{0}/*'.format(tasks_dir))
     try:
-        scripts.remove('{}/README'.format(tasks_dir))
+        scripts.remove('{0}/README'.format(tasks_dir))
     except ValueError:
         pass
     scripts.sort()
@@ -114,12 +114,12 @@ def call_tasks(scripts):
         try:
             status = subprocess.call(script)
         except OSError:
-            log('task {} skipped'.format(scriptname))
+            log('task {0} skipped'.format(scriptname))
         else:
             if status == 0:
-                log('task {} completed'.format(scriptname))
+                log('task {0} completed'.format(scriptname))
             else:
-                log('task {} failed {}'.format(scriptname, status))
+                log('task {0} failed {1}'.format(scriptname, status))
     else:
         log('completed all tasks')
 
