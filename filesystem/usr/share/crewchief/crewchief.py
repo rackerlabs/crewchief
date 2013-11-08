@@ -22,15 +22,15 @@ import requests
 import subprocess
 from syslog import syslog as log
 try:
-    import ConfigParser
-except ImportError:
     import configparser
+except ImportError:
+    import ConfigParser as configparser
 
 
 def parse_config():
     ''' obtain the user settings from crewchief.ini '''
     # parse the config file
-    config = ConfigParser.ConfigParser()
+    config = configparser.ConfigParser()
     config.read('/etc/crewchief/crewchief.ini')
     # set the defaults
     settings = {'max_api_attempts': 10,
@@ -48,7 +48,7 @@ def parse_config():
             else:
                 # the option is bogus
                 log('{}: invalid option'.format(each))
-    except ConfigParser.NoSectionError:
+    except configparser.NoSectionError:
         # the file is malformed or missing
         log('malformed or missing configuration file, using defaults')
     # return our settings dictionary
