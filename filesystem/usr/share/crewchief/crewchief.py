@@ -62,9 +62,27 @@ def parse_config():
 
 def get_region():
     ''' obtain the region from the xenstore '''
+    # system command to pull region from xenstore
     xencmd = ['xenstore-read', 'vm-data/provider_data/region']
-    region = subprocess.check_output(xencmd).rstrip('\n')
-    return region
+    try:
+        output = subprocess.Popen(xencmd,
+                                  stdout=subprocess.PIPE
+                                  stderr=subprocess.PIPE
+                                  ).communicate()
+    except FileNotFoundError:
+        msg = 'could not find xenstore-read command'
+    else:
+        if output[0]:
+            region = output[0].rstrip('\n')
+        elif 'Permission denied' in output[1]:
+            msg = 'permission denied reading xenstore'
+        else:
+            msg = 'unknown error while reading xenstore'
+    if region:
+        return region
+    else:
+        log(msg)
+        sys.exit(msg)
 
 
 def query_api(settings):
