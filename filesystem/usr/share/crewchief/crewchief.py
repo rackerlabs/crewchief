@@ -82,7 +82,9 @@ def query_api(settings):
     # loop the API call until done or max attempts
     for each in range(int(max_api_attempts)):
         try:
-            rcstatus = urlopen(Request(apiurl), timeout=3).read()
+            req = Request(apiurl)
+            res = urlopen(req, timeout=3)
+            rcstatus = res.read()
         except Exception:
             log('rackconnect API error, {0}'.format(sleepmsg))
             time.sleep(api_wait_seconds)
