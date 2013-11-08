@@ -18,13 +18,18 @@ import os
 import sys
 import time
 import glob
-import requests
 import subprocess
 from syslog import syslog as log
+
 try:
     import configparser
 except ImportError:
     import ConfigParser as configparser
+
+try:
+    from urllib.request import urlopen, Request
+except ImportError:
+    from urllib2 import urlopen, Request
 
 
 def parse_config():
@@ -77,9 +82,9 @@ def query_api(settings):
     # loop the API call until done or max attempts
     for each in range(int(max_api_attempts)):
         try:
-            rcstatus = requests.get(apiurl, timeout=3).content
-        except requests.exceptions.Timeout:
-            log('rackconnect API call timeout, {0}'.format(sleepmsg))
+            rcstatus = urlopen(Request(apiurl), timeout=3).read()
+        except Exception:
+            log('rackconnect API error, {0}'.format(sleepmsg))
             time.sleep(api_wait_seconds)
             continue
         else:
