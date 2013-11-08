@@ -124,9 +124,9 @@ def call_tasks(scripts):
             if status == 0:
                 log('task {0} completed'.format(scriptname))
             else:
-                log('task {0} failed {1}'.format(scriptname, status))
+                log('task {0} failed ({1})'.format(scriptname, status))
     else:
-        log('completed all tasks')
+        log('finished processing tasks')
 
 
 def main():
