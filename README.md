@@ -25,6 +25,8 @@ Once Rackconnect automation is complete, crewchief will execute the files in thi
 
 ## installation
 
+The included Upstart file will run crewchief at boot on Ubuntu and RHEL 6.  If your distribution does not use Upstart, then you will need to implement your own method for launching crewchief at system boot.
+
 ```
 pip install https://github.com/rackerlabs/crewchief/archive/master.tar.gz
 ```
