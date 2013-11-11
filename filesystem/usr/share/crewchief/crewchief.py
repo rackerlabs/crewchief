@@ -76,16 +76,16 @@ def get_region():
         if output[0]:
             # output on stdout is our region
             region = output[0].rstrip('\n')
-            msg = 'obtained region from xenstore'
+            msg = 'region {0} obtained from xenstore'.format(region)
         elif 'Permission denied' in output[1]:
             # stderr probably means script wasn't run as root
             msg = 'permission denied reading xenstore'
         else:
             msg = 'unknown error while reading xenstore'
+    log(msg)
     if region:
         return region
     else:
-        log(msg)
         sys.exit(msg)
 
 
