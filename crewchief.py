@@ -66,10 +66,10 @@ def get_region():
     # system command to pull region from xenstore
     xencmd = ['xenstore-read', 'vm-data/provider_data/region']
     try:
-        output = subprocess.Popen(xencmd,
-                                  stdout=subprocess.PIPE
-                                  stderr=subprocess.PIPE
-                                  ).communicate()
+        process = subprocess.Popen(xencmd,
+                                   stdout=subprocess.PIPE,
+                                   stderr=subprocess.PIPE)
+        output = process.communicate()
     except FileNotFoundError:
         msg = 'could not find xenstore-read command'
     else:
