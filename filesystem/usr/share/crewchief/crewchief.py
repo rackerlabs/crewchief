@@ -40,12 +40,13 @@ def parse_config():
     # set the defaults
     settings = {'max_api_attempts': 10,
                 'api_wait_seconds': 60}
+    # overwrite defaults with values from config file
     try:
         for each in config.options('main'):
             # test if the config option is a valid key
             if each in settings.keys():
                 try:
-                    # overwrite the default setting to the one from config
+                    # do the overwrite
                     settings[each] = config.getint('main', each)
                 except ValueError:
                     # not an interger, use the default
@@ -73,8 +74,11 @@ def get_region():
         msg = 'could not find xenstore-read command'
     else:
         if output[0]:
+            # output on stdout is our region
             region = output[0].rstrip('\n')
+            msg = 'obtained region from xenstore'
         elif 'Permission denied' in output[1]:
+            # stderr probably means script wasn't run as root
             msg = 'permission denied reading xenstore'
         else:
             msg = 'unknown error while reading xenstore'
@@ -140,10 +144,13 @@ def get_tasks(settings):
 def call_tasks(scripts):
     ''' run the scripts from the input list '''
     for script in scripts:
+        # strip off the path to the script name
         scriptname = os.path.basename(script)
         try:
+            # run the script and save the exit status
             status = subprocess.call(script)
         except OSError:
+            # not executable
             log('task {0} skipped'.format(scriptname))
         else:
             if status == 0:
