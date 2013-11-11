@@ -130,11 +130,6 @@ def get_tasks(settings):
     tasks_dir = '/etc/crewchief/tasks.d'
     # create a list of all the files in that directory
     scripts = glob.glob('{0}/*'.format(tasks_dir))
-    # remove the README file from the list
-    try:
-        scripts.remove('{0}/README'.format(tasks_dir))
-    except ValueError:
-        pass
     # sort the scripts to honor numbered order (00-foo, 01-bar, etc.)
     scripts.sort()
     # return the list
