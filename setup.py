@@ -8,7 +8,7 @@ setuptools.setup(
     description=('Launch scripts after Rackconnect automation is complete.'),
     author='Carl George',
     author_email='carl.george@rackspace.com',
-    url='https://github.rackspace.com/carl-george/crewchief',
+    url='https://github.com/rackerlabs/crewchief',
     license='Apache License, Version 2.0',
     py_modules=['crewchief'],
     entry_points={
