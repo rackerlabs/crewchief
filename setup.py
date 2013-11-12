@@ -2,7 +2,7 @@ import setuptools
 
 setuptools.setup(
     name='crewchief',
-    version='0.1',
+    version='0.2',
     description=('Launch scripts after Rackconnect automation is complete.'),
     author='Carl George',
     author_email='carl.george@rackspace.com',
