@@ -17,7 +17,7 @@ import sys
 import time
 import glob
 import subprocess
-from syslog import syslog as log
+import syslog
 
 try:
     import configparser
@@ -40,21 +40,35 @@ def parse_config():
                 'api_wait_seconds': 60}
     # overwrite defaults with values from config file
     try:
+        # check if this section exists
+        config.options('main')
+    except configparser.NoSectionError:
+        # the file is missing or there is no main section
+        syslog.syslog('missing or malformed configuration file, '
+                      'using default settings')
+    else:
+        # loop through each config option
         for each in config.options('main'):
             # test if the config option is a valid key
             if each in settings.keys():
                 try:
-                    # do the overwrite
-                    settings[each] = config.getint('main', each)
+                    # get the value
+                    value = config.getint('main', each)
                 except ValueError:
-                    # not an interger, use the default
-                    log('{0}: invalid value, using default'.format(each))
+                    # not an interger, leave as default
+                    cfgmsg = '{OPTION}: invalid value, using default'.format(
+                        OPTION=each)
+                else:
+                    # do the overwrite
+                    settings[each] = value
+                    cfgmsg = '{OPTION}: set to {VALUE}'.format(
+                        OPTION=each,
+                        VALUE=value)
             else:
                 # the option is bogus
-                log('{0}: invalid option'.format(each))
-    except configparser.NoSectionError:
-        # the file is malformed or missing
-        log('malformed or missing configuration file, using defaults')
+                syslog.syslog('{OPTION}: invalid option'.format(OPTION=each))
+            # log what we found for that option
+            syslog.syslog(cfgmsg)
     # return our settings dictionary
     return settings
 
@@ -69,22 +83,23 @@ def get_region():
                                    stderr=subprocess.PIPE)
         output = process.communicate()
     except FileNotFoundError:
-        msg = 'could not find xenstore-read command'
+        regionmsg = 'could not find xenstore-read command'
     else:
         if output[0]:
             # output on stdout is our region
             region = output[0].rstrip('\n')
-            msg = 'region {0} obtained from xenstore'.format(region)
+            regionmsg = 'region {REGION} obtained from xenstore'.format(
+                REGION=region)
         elif 'Permission denied' in output[1]:
             # stderr probably means script wasn't run as root
-            msg = 'permission denied reading xenstore'
+            regionmsg = 'permission denied reading xenstore'
         else:
-            msg = 'unknown error while reading xenstore'
-    log(msg)
+            regionmsg = 'unknown error while reading xenstore'
+    syslog.syslog(regionmsg)
     if region:
         return region
     else:
-        sys.exit(msg)
+        sys.exit(regionmsg)
 
 
 def query_api(settings):
@@ -92,73 +107,77 @@ def query_api(settings):
     # pull our settings from the dictionary
     max_api_attempts = settings.get('max_api_attempts')
     api_wait_seconds = settings.get('api_wait_seconds')
-    sleepmsg = 'sleeping {0} seconds'.format(api_wait_seconds)
     # construct the endpoint url
     apiurl = 'https://{REGION}.{DOMAIN}/{VERSION}/{INFO}'.format(
         REGION=get_region(),
         DOMAIN='api.rackconnect.rackspace.com',
         VERSION='v1',
         INFO='automation_status')
+    req = Request(apiurl)
     # loop the API call until done or max attempts
-    for each in range(int(max_api_attempts)):
+    for each in range(max_api_attempts):
         try:
-            req = Request(apiurl)
+            # make the http GET request
             res = urlopen(req, timeout=3)
             rcstatus = res.read()
         except Exception:
-            log('rackconnect API error, {0}'.format(sleepmsg))
-            time.sleep(api_wait_seconds)
-            continue
+            syslog.syslog('rackconnect API error, sleeping {0} '
+                          'seconds'.format(api_wait_seconds))
         else:
             if rcstatus == 'DEPLOYED':
-                log('rackconnect automation complete')
+                syslog.syslog('rackconnect automation complete')
                 return True
             else:
-                log('rackconnect automation incomplete, {0}'.format(sleepmsg))
-                time.sleep(api_wait_seconds)
-                continue
+                syslog.syslog('rackconnect automation incomplete, sleeping '
+                              '{0} seconds'.format(api_wait_seconds))
+        time.sleep(api_wait_seconds)
     else:
-        log('hit max api attempts, giving up')
+        syslog.syslog('hit max api attempts, giving up')
         return False
 
 
 def get_tasks(settings):
-    ''' obtain the list of scripts from /etc/crewchief/tasks.d '''
+    ''' obtain the list of tasks from /etc/crewchief/tasks.d '''
     # set the tasks directory
     tasks_dir = '/etc/crewchief/tasks.d'
     # create a list of all the files in that directory
-    scripts = glob.glob('{0}/*'.format(tasks_dir))
-    # sort the scripts to honor numbered order (00-foo, 01-bar, etc.)
-    scripts.sort()
+    tasks = glob.glob('{0}/*'.format(tasks_dir))
+    # sort the tasks to honor numbered order (00-foo, 01-bar, etc.)
+    tasks.sort()
     # return the list
-    return scripts
+    return tasks
 
 
-def call_tasks(scripts):
+def call_tasks(tasks):
     ''' run the scripts from the input list '''
-    for script in scripts:
+    for task in tasks:
         # strip off the path to the script name
-        scriptname = os.path.basename(script)
+        taskname = os.path.basename(task)
         try:
             # run the script and save the exit status
-            status = subprocess.call(script)
+            status = subprocess.call(task)
         except OSError:
             # not executable
-            log('task {0} skipped'.format(scriptname))
+            scriptmsg = 'task {TASK} skipped'.format(TASK=taskname)
         else:
             if status == 0:
-                log('task {0} completed'.format(scriptname))
+                scriptmsg = 'task {TASK} completed'.format(TASK=taskname)
             else:
-                log('task {0} failed ({1})'.format(scriptname, status))
+                scriptmsg = 'task {TASK} failed ({EXIT})'.format(
+                    TASK=taskname,
+                    EXIT=status)
+        syslog.syslog(scriptmsg)
     else:
-        log('finished processing tasks')
+        syslog.syslog('finished processing tasks')
 
 
 def main():
+    # set the ident for syslog
+    syslog.openlog('crewchief')
     settings = parse_config()
     if query_api(settings):
-        scripts = get_tasks(settings)
-        call_tasks(scripts)
+        tasks = get_tasks(settings)
+        call_tasks(tasks)
     else:
         sys.exit(1)
 
