@@ -81,25 +81,20 @@ def get_region():
         process = subprocess.Popen(xencmd,
                                    stdout=subprocess.PIPE,
                                    stderr=subprocess.PIPE)
-        output = process.communicate()
-    except FileNotFoundError:
-        regionmsg = 'could not find xenstore-read command'
+    except EnvironmentError:
+        syslog.syslog('could not run xenstore-read command')
     else:
+        output = process.communicate()
         if output[0]:
             # output on stdout is our region
             region = output[0].rstrip('\n')
-            regionmsg = 'region {REGION} obtained from xenstore'.format(
-                REGION=region)
+            return region
         elif 'Permission denied' in output[1]:
             # stderr probably means script wasn't run as root
-            regionmsg = 'permission denied reading xenstore'
+            syslog.syslog('permission denied running xenstore-read command')
         else:
-            regionmsg = 'unknown error while reading xenstore'
-    syslog.syslog(regionmsg)
-    if region:
-        return region
-    else:
-        sys.exit(regionmsg)
+            syslog.syslog('unknown error running xenstore-read command')
+    sys.exit(1)
 
 
 def query_api(settings):
