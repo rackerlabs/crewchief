@@ -15,9 +15,8 @@ setuptools.setup(
         ]
     },
     data_files=[
-        ('/etc/crewchief', ['data_files/crewchief.ini']),
-        ('/etc/crewchief/tasks.d', ['data_files/10-example']),
-        ('/etc/init', ['data_files/crewchief.conf'])
+        ('/etc/crewchief', ['data_files/package/crewchief.ini']),
+        ('/etc/crewchief/tasks.d', ['data_files/package/10-example'])
     ],
     classifiers=[
         'Programming Language :: Python',
