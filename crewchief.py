@@ -72,24 +72,31 @@ def get_region():
     ''' obtain the region from the xenstore '''
     # system command to pull region from xenstore
     xencmd = ['xenstore-read', 'vm-data/provider_data/region']
+    # set region to none initially
+    region = None
     try:
         process = subprocess.Popen(xencmd,
                                    stdout=subprocess.PIPE,
                                    stderr=subprocess.PIPE)
     except EnvironmentError:
-        syslog.syslog('could not run xenstore-read command')
+        syslog.syslog('could not execute xenstore-read command')
     else:
         output = process.communicate()
+        # 0 stdout
+        # 1 stderr
         if output[0]:
-            # output on stdout is our region
+            # overwrite region with the correct value
             region = output[0].rstrip('\n')
-            return region
+            syslog.syslog('obtained region {0} from xenstore'.format(region))
+        elif 'No such file or directory' in output[1]:
+            # xenfs isn't mounted yet
+            syslog.syslog('unable to read xenstore')
         elif 'Permission denied' in output[1]:
-            # stderr probably means script wasn't run as root
-            syslog.syslog('permission denied running xenstore-read command')
+            # wasn't run as root
+            syslog.syslog('permission denied accessing xenstore')
         else:
-            syslog.syslog('unknown error running xenstore-read command')
-    sys.exit(1)
+            syslog.syslog('unknown error accessing xenstore')
+    return region
 
 
 def query_api(settings):
@@ -97,29 +104,30 @@ def query_api(settings):
     # pull our settings from the dictionary
     max_api_attempts = settings.get('max_api_attempts')
     api_wait_seconds = settings.get('api_wait_seconds')
-    # construct the endpoint url
-    apiurl = 'https://{REGION}.{DOMAIN}/{VERSION}/{INFO}'.format(
-        REGION=get_region(),
-        DOMAIN='api.rackconnect.rackspace.com',
-        VERSION='v1',
-        INFO='automation_status')
-    req = Request(apiurl)
     # loop the API call until done or max attempts
     for each in range(max_api_attempts):
-        try:
-            # make the http GET request
-            res = urlopen(req, timeout=3)
-            rcstatus = res.read()
-        except Exception:
-            syslog.syslog('rackconnect API error, sleeping {0} '
-                          'seconds'.format(api_wait_seconds))
-        else:
-            if rcstatus == 'DEPLOYED':
-                syslog.syslog('rackconnect automation complete')
-                return True
+        region = get_region()
+        if region:
+            # construct the endpoint url
+            apiurl = 'https://{REGION}.{DOMAIN}/{VERSION}/{INFO}'.format(
+                REGION=region,
+                DOMAIN='api.rackconnect.rackspace.com',
+                VERSION='v1',
+                INFO='automation_status')
+            req = Request(apiurl)
+            try:
+                # make the http GET request
+                res = urlopen(req, timeout=3)
+            except Exception:
+                syslog.syslog('could not connect to rackconnect API')
             else:
-                syslog.syslog('rackconnect automation incomplete, sleeping '
-                              '{0} seconds'.format(api_wait_seconds))
+                rcstatus = res.read()
+                if rcstatus == 'DEPLOYED':
+                    syslog.syslog('rackconnect automation complete')
+                    return True
+                else:
+                    syslog.syslog('rackconnect automation incomplete')
+        # if get_region fails we have a log message from that function
         time.sleep(api_wait_seconds)
     else:
         syslog.syslog('hit max api attempts, giving up')
