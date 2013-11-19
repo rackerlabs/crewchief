@@ -15,7 +15,7 @@ setuptools.setup(
         ]
     },
     data_files=[
-        ('/etc/crewchief', ['data_files/package/crewchief.ini']),
+        ('/etc/crewchief', ['data_files/package/crewchief.cnf']),
         ('/etc/crewchief/tasks.d', ['data_files/package/10-example'])
     ],
     classifiers=[
