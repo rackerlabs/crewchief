@@ -31,7 +31,7 @@ except ImportError:
 
 
 def parse_config():
-    ''' obtain the user settings from crewchief.ini '''
+    ''' obtain the user settings from crewchief.cnf '''
     # parse the config file
     config = configparser.ConfigParser()
     config.read('/etc/crewchief/crewchief.cnf')
