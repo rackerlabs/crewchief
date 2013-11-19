@@ -7,7 +7,7 @@ Launch scripts after Rackconnect automation is complete on a Linux cloud server.
 stable
 
 ```
-pip install https://github.com/rackerlabs/crewchief/archive/v0.2.tar.gz
+pip install https://github.com/rackerlabs/crewchief/archive/v0.3.tar.gz
 ```
 
 development
