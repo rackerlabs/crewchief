@@ -56,14 +56,14 @@ def parse_config():
                     value = config.getint('main', each)
                 except ValueError:
                     # not an interger, leave as default
-                    syslog.syslog('{OPTION}: invalid value, using default'.format(
-                        OPTION=each))
+                    syslog.syslog('{0}: invalid value, using default'.format(
+                        each))
                 else:
                     # do the overwrite
                     settings[each] = value
             else:
                 # the option is bogus
-                syslog.syslog('{OPTION}: invalid option'.format(OPTION=each))
+                syslog.syslog('{0}: invalid option'.format(each))
     # return our settings dictionary
     return settings
 
