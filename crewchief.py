@@ -34,7 +34,7 @@ def parse_config():
     ''' obtain the user settings from crewchief.ini '''
     # parse the config file
     config = configparser.ConfigParser()
-    config.read('/etc/crewchief/crewchief.ini')
+    config.read('/etc/crewchief/crewchief.cnf')
     # set the defaults
     settings = {'max_api_attempts': 10,
                 'api_wait_seconds': 60}
