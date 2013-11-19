@@ -151,20 +151,20 @@ def call_tasks(tasks):
     for task in tasks:
         # strip off the path to the script name
         taskname = os.path.basename(task)
-        try:
-            # run the script and save the exit status
-            status = subprocess.call(task)
-        except OSError:
-            # not executable
-            scriptmsg = 'task {TASK} skipped'.format(TASK=taskname)
+        # run the script and save the exit status
+        status = subprocess.call(task, shell=True)
+        if status == 0:
+            # run successfully
+            result = 'completed'
+        elif status == 126:
+            # task not executable
+            result = 'skipped'
         else:
-            if status == 0:
-                scriptmsg = 'task {TASK} completed'.format(TASK=taskname)
-            else:
-                scriptmsg = 'task {TASK} failed ({EXIT})'.format(
-                    TASK=taskname,
-                    EXIT=status)
-        syslog.syslog(scriptmsg)
+            # unknown exit status
+            result = 'exited with a status of {0}'.format(status)
+        syslog.syslog('task {TASKNAME} {RESULT}'.format(
+            TASKNAME=taskname,
+            RESULT=result))
     else:
         syslog.syslog('finished processing tasks')
 
