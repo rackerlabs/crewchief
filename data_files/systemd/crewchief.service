@@ -1,0 +1,11 @@
+[Unit]
+Description=Rackconnect Crewchief
+After=network.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=crewchief
+
+[Install]
+WantedBy=multi-user.target
