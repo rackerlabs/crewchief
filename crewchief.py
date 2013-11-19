@@ -134,7 +134,7 @@ def query_api(settings):
         return False
 
 
-def get_tasks(settings):
+def get_tasks():
     ''' obtain the list of tasks from /etc/crewchief/tasks.d '''
     # set the tasks directory
     tasks_dir = '/etc/crewchief/tasks.d'
@@ -174,7 +174,7 @@ def main():
     syslog.openlog('crewchief')
     settings = parse_config()
     if query_api(settings):
-        tasks = get_tasks(settings)
+        tasks = get_tasks()
         call_tasks(tasks)
     else:
         sys.exit(1)
