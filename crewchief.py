@@ -104,9 +104,11 @@ def query_api(settings):
     # pull our settings from the dictionary
     max_api_attempts = settings.get('max_api_attempts')
     api_wait_seconds = settings.get('api_wait_seconds')
+    region = None
     # loop the API call until done or max attempts
-    for each in range(max_api_attempts):
-        region = get_region()
+    for attempt in range(max_api_attempts):
+        if region is None:
+            region = get_region()
         if region:
             # construct the endpoint url
             apiurl = 'https://{REGION}.{DOMAIN}/{VERSION}/{INFO}'.format(
