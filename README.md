@@ -2,7 +2,7 @@
 
 Launch scripts after Rackconnect automation is complete on a Linux cloud server.
 
-## installation
+## Installation
 
 stable
 
@@ -18,7 +18,7 @@ pip install https://github.com/rackerlabs/crewchief/archive/master.tar.gz
 
 If installed via pip, you must implement a method for automatically starting crewchief at boot time.  Example upstart and systemd files are included under the data_files directory.
 
-## configuration
+## Configuration
 
 When run, crewchief will attempt to get the Rackconnect automation status.  It will keep trying with an interval of api_wait_seconds until it reaches max_api_attempts.  By default this is 10 attempts with a 60 second wait interval.  This can be customized in the configuration file.
 
