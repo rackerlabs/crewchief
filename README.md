@@ -16,7 +16,7 @@ development
 pip install https://github.com/rackerlabs/crewchief/archive/master.tar.gz
 ```
 
-If installed via pip, you must implement a method for automatically starting crewchief at boot time.  Example upstart and systemd files are included under the data_files directory.
+You must implement a method for automatically starting crewchief at boot time.  Example upstart and systemd files are included under the data_files directory.  Crewchief depends on the special xenfs filesystem to be mounted at /proc/xen, so ensure that it starts after that.
 
 ## Configuration
 
