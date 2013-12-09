@@ -100,7 +100,7 @@ def get_region():
 
 
 def query_api(settings):
-    ''' query the Rackconnect API to see if automation is complete '''
+    ''' query the RackConnect API to see if automation is complete '''
     # pull our settings from the dictionary
     max_api_attempts = settings.get('max_api_attempts')
     api_wait_seconds = settings.get('api_wait_seconds')
@@ -121,14 +121,14 @@ def query_api(settings):
                 # make the http GET request
                 res = urlopen(req, timeout=3)
             except Exception:
-                syslog.syslog('could not connect to rackconnect API')
+                syslog.syslog('could not connect to RackConnect API')
             else:
                 rcstatus = res.read()
                 if rcstatus == 'DEPLOYED':
-                    syslog.syslog('rackconnect automation complete')
+                    syslog.syslog('RackConnect automation complete')
                     return True
                 else:
-                    syslog.syslog('rackconnect automation incomplete')
+                    syslog.syslog('RackConnect automation incomplete')
         # if get_region fails we have a log message from that function
         time.sleep(api_wait_seconds)
     else:
