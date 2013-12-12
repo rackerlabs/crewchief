@@ -2,7 +2,7 @@ import setuptools
 
 setuptools.setup(
     name='crewchief',
-    version='0.2',
+    version='0.3',
     description=('Launch scripts after Rackconnect automation is complete.'),
     author='Carl George',
     author_email='carl.george@rackspace.com',
@@ -15,8 +15,7 @@ setuptools.setup(
         ]
     },
     data_files=[
-        ('/etc/crewchief', ['data_files/package/crewchief.cnf']),
-        ('/etc/crewchief/tasks.d', ['data_files/package/10-example'])
+        ('/etc/crewchief.d', ['data_files/package/10-example'])
     ],
     classifiers=[
         'Programming Language :: Python',

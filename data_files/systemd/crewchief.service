@@ -1,7 +1,7 @@
 [Unit]
 Description=Rackconnect Crewchief
-After=network.target
 Requires=proc-xen.mount
+After=proc-xen.mount
 
 [Service]
 Type=oneshot

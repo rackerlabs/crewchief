@@ -1,8 +1,0 @@
-[main]
-
-# During boot, crewchief attempts to get the Rackconnect
-# automation status.  It will keep trying with an interval
-# of api_wait_seconds until it reaches max_api_attempts.
-
-# max_api_attempts = 10
-# api_wait_seconds = 60

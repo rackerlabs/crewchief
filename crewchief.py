@@ -12,144 +12,25 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import os
-import sys
-import time
+import argparse
 import glob
+import os
 import subprocess
+import sys
 import syslog
-
-try:
-    import configparser
-except ImportError:
-    import ConfigParser as configparser
-
-try:
-    from urllib.request import urlopen, Request
-except ImportError:
-    from urllib2 import urlopen, Request
+import time
 
 
-def parse_config():
-    ''' obtain the user settings from crewchief.cnf '''
-    # parse the config file
-    config = configparser.ConfigParser()
-    config.read('/etc/crewchief/crewchief.cnf')
-    # set the defaults
-    settings = {'max_api_attempts': 10,
-                'api_wait_seconds': 60}
-    # overwrite defaults with values from config file
-    try:
-        # check if this section exists
-        config.options('main')
-    except configparser.NoSectionError:
-        # the file is missing or there is no main section
-        syslog.syslog('missing or malformed configuration file, '
-                      'using default settings')
-    else:
-        # loop through each config option
-        for each in config.options('main'):
-            # test if the config option is a valid key
-            if each in settings.keys():
-                try:
-                    # get the value
-                    value = config.getint('main', each)
-                except ValueError:
-                    # not an interger, leave as default
-                    syslog.syslog('{0}: invalid value, using default'.format(
-                        each))
-                else:
-                    # do the overwrite
-                    settings[each] = value
-            else:
-                # the option is bogus
-                syslog.syslog('{0}: invalid option'.format(each))
-    # return our settings dictionary
-    return settings
-
-
-def get_region():
-    ''' obtain the region from the xenstore '''
-    # system command to pull region from xenstore
-    xencmd = ['xenstore-read', 'vm-data/provider_data/region']
-    # set region to none initially
-    region = None
-    try:
-        process = subprocess.Popen(xencmd,
-                                   stdout=subprocess.PIPE,
-                                   stderr=subprocess.PIPE)
-    except EnvironmentError:
-        syslog.syslog('could not execute xenstore-read command')
-    else:
-        output = process.communicate()
-        # 0 stdout
-        # 1 stderr
-        if output[0]:
-            # overwrite region with the correct value
-            region = output[0].rstrip('\n')
-            syslog.syslog('obtained region {0} from xenstore'.format(region))
-        elif 'No such file or directory' in output[1]:
-            # xenfs isn't mounted yet
-            syslog.syslog('unable to read xenstore')
-        elif 'Permission denied' in output[1]:
-            # wasn't run as root
-            syslog.syslog('permission denied accessing xenstore')
-        else:
-            syslog.syslog('unknown error accessing xenstore')
-    return region
-
-
-def query_api(settings):
-    ''' query the RackConnect API to see if automation is complete '''
-    # pull our settings from the dictionary
-    max_api_attempts = settings.get('max_api_attempts')
-    api_wait_seconds = settings.get('api_wait_seconds')
-    region = None
-    # loop the API call until done or max attempts
-    for attempt in range(max_api_attempts):
-        if region is None:
-            region = get_region()
-        if region:
-            # construct the endpoint url
-            apiurl = 'https://{REGION}.{DOMAIN}/{VERSION}/{INFO}'.format(
-                REGION=region,
-                DOMAIN='api.rackconnect.rackspace.com',
-                VERSION='v1',
-                INFO='automation_status')
-            req = Request(apiurl)
-            try:
-                # make the http GET request
-                res = urlopen(req, timeout=3)
-            except Exception:
-                syslog.syslog('could not connect to RackConnect API')
-            else:
-                rcstatus = res.read()
-                if rcstatus == 'DEPLOYED':
-                    syslog.syslog('RackConnect automation complete')
-                    return True
-                else:
-                    syslog.syslog('RackConnect automation incomplete')
-        # if get_region fails we have a log message from that function
-        time.sleep(api_wait_seconds)
-    else:
-        syslog.syslog('hit max api attempts, giving up')
-        return False
-
-
-def get_tasks():
-    ''' obtain the list of tasks from /etc/crewchief/tasks.d '''
-    # set the tasks directory
-    tasks_dir = '/etc/crewchief/tasks.d'
-    # create a list of all the files in that directory
-    tasks = glob.glob('{0}/*'.format(tasks_dir))
-    # sort the tasks to honor numbered order (00-foo, 01-bar, etc.)
-    tasks.sort()
-    # return the list
-    return tasks
+def log(msg, args):
+    ''' Log to syslog and optionally console. '''
+    if args.debug:
+        sys.stdout.write(msg)
+        sys.stdout.flush()
+    syslog.syslog(msg)
 
 
 def call_tasks(tasks):
-    ''' run the scripts from the input list '''
+    ''' Run each task in the given task list. '''
     for task in tasks:
         # strip off the path to the script name
         taskname = os.path.basename(task)
@@ -164,18 +45,111 @@ def call_tasks(tasks):
         else:
             # unknown exit status
             result = 'exited with a status of {0}'.format(status)
-        syslog.syslog('task {TASKNAME} {RESULT}'.format(
-            TASKNAME=taskname,
-            RESULT=result))
+        log('task {0} {1}'.format(taskname, result))
     else:
-        syslog.syslog('finished processing tasks')
+        log('finished processing tasks')
+
+
+def get_tasks():
+    ''' Obtain the list of tasks from /etc/crewchief.d '''
+    # set the tasks directory
+    tasks_dir = '/etc/crewchief.d'
+    # create a list of all the files in that directory
+    tasks = glob.glob('{0}/*'.format(tasks_dir))
+    # sort the tasks to honor numbered order (00-foo, 01-bar, etc.)
+    tasks.sort()
+    # return the list
+    return tasks
+
+
+def status_check(args):
+    ''' Obtain the RackConnect status from xenstore. '''
+    # false if xenstore isn't mounted
+    if not os.path.ismount('/proc/xen'):
+        log('xenstore is not yet mounted', args)
+        return False
+    # system command to pull metadata from xenstore
+    xencmd = ['xenstore-read',
+              'vm-data/user-metadata/rackconnect_automation_status']
+    try:
+        process = subprocess.Popen(xencmd,
+                                   stdout=subprocess.PIPE,
+                                   stderr=subprocess.PIPE)
+    except EnvironmentError:
+        # false if the command is not found
+        log('failed to execute xenstore-read', args)
+        return False
+    else:
+        output = process.communicate()
+        # 0 stdout, 1 stderr
+        if output[1]:
+            log('recieved error from xenstore-read', args)
+            log(output[1].rstrip('\n'), args)
+            return False
+        elif output[0] == '"DEPLOYED"\n':
+            # RackConnect is done
+            return True
+        else:
+            # status is probably DEPLOYING or FAILED
+            return False
+
+
+def control(args):
+    ''' Logic control. '''
+    # loop for the count
+    for attempt in range(args.count):
+        if status_check(args):
+            # RackConnect is done, so return out of the loop
+            log('RackConnect automation complete', args)
+            return True
+        else:
+            # RackConnect isn't done, so wait for the interval and loop again
+            log('RackConnect automation not yet complete', args)
+            time.sleep(args.interval)
+    else:
+        # ran out of attempts
+        log('hit max api attempts, giving up', args)
+        return False
+
+
+def handle_args():
+    ''' Process command line flags. '''
+    # set main program variables
+    the_name = 'crewchief'
+    the_description = 'Launch scripts after RackConnect automation is complete.'
+    the_version = '%(prog)s 0.3'
+    # create our parser object
+    parser = argparse.ArgumentParser(prog=the_name,
+                                     description=the_description)
+    parser.add_argument('-v',
+                        '--version',
+                        action='version',
+                        version=the_version)
+    parser.add_argument('-c',
+                        '--count',
+                        type=int,
+                        default=10,
+                        help='Number of attempts to check the RackConnect '
+                             'status.  Defaults to 10.')
+    parser.add_argument('-i',
+                        '--interval',
+                        type=int,
+                        default=60,
+                        help='Number of seconds to wait between attempts.  '
+                             'Defaults to 60.')
+    parser.add_argument('-d',
+                        '--debug',
+                        action='store_true')
+    # parse the arguments to create args object
+    args = parser.parse_args()
+    return args
 
 
 def main():
     # set the ident for syslog
     syslog.openlog('crewchief')
-    settings = parse_config()
-    if query_api(settings):
+    args = handle_args()
+    if control(args):
         tasks = get_tasks()
         call_tasks(tasks)
     else:
