@@ -29,7 +29,7 @@ def log(msg, args):
     syslog.syslog(msg)
 
 
-def call_tasks(tasks):
+def call_tasks(tasks, args):
     ''' Run each task in the given task list. '''
     for task in tasks:
         # strip off the path to the script name
@@ -45,9 +45,9 @@ def call_tasks(tasks):
         else:
             # unknown exit status
             result = 'exited with a status of {0}'.format(status)
-        log('task {0} {1}'.format(taskname, result))
+        log('task {0} {1}'.format(taskname, result), args)
     else:
-        log('finished processing tasks')
+        log('finished processing tasks', args)
 
 
 def get_tasks():
@@ -139,7 +139,8 @@ def handle_args():
                              'Defaults to 60.')
     parser.add_argument('-d',
                         '--debug',
-                        action='store_true')
+                        action='store_true',
+                        help='')
     # parse the arguments to create args object
     args = parser.parse_args()
     return args
@@ -151,7 +152,7 @@ def main():
     args = handle_args()
     if control(args):
         tasks = get_tasks()
-        call_tasks(tasks)
+        call_tasks(tasks, args)
     else:
         sys.exit(1)
 
