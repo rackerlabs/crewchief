@@ -90,7 +90,7 @@ def status_check(args):
             # RackConnect is done
             return True
         else:
-            # status is probably DEPLOYING or FAILED
+            # status is probably DEPLOYING, FAILED, or UNPROCESSABLE
             return False
 
 
