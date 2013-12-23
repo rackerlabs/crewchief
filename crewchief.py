@@ -24,7 +24,7 @@ import time
 def log(msg, args):
     ''' Log to syslog and optionally console. '''
     if args.debug:
-        sys.stdout.write(msg)
+        sys.stdout.write('{0}\n'.format(msg))
         sys.stdout.flush()
     syslog.syslog(msg)
 
