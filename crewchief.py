@@ -35,7 +35,11 @@ def call_tasks(tasks, args):
         # strip off the path to the script name
         taskname = os.path.basename(task)
         # run the script and save the exit status
-        status = subprocess.call(task, shell=True)
+        process = subprocess.Popen(task,
+                                   stdout=subprocess.PIPE,
+                                   stderr=subprocess.PIPE,
+                                   shell=True)
+        status = process.wait()
         if status == 0:
             # run successfully
             result = 'completed'
