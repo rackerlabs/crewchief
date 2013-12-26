@@ -92,9 +92,11 @@ def status_check(args):
             return False
         elif output[0] == '"DEPLOYED"\n':
             # RackConnect is done
+            log('RackConnect automation complete', args)
             return True
         else:
             # status is probably DEPLOYING, FAILED, or UNPROCESSABLE
+            log('RackConnect automation not yet complete', args)
             return False
 
 
@@ -104,11 +106,9 @@ def control(args):
     for attempt in range(args.count):
         if status_check(args):
             # RackConnect is done, so return out of the loop
-            log('RackConnect automation complete', args)
             return True
         else:
-            # RackConnect isn't done, so wait for the interval and loop again
-            log('RackConnect automation not yet complete', args)
+            # wait for the interval and loop again
             time.sleep(args.interval)
     else:
         # ran out of attempts
