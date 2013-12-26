@@ -24,6 +24,7 @@ setuptools.setup(
     url='https://github.com/rackerlabs/crewchief',
     license='Apache License, Version 2.0',
     py_modules=['crewchief'],
+    install_requires=['argparse'],
     entry_points={
         'console_scripts': [
             'crewchief=crewchief:main'
