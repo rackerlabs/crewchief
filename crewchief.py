@@ -133,12 +133,14 @@ def handle_args():
                         '--count',
                         type=int,
                         default=10,
+                        metavar='X',
                         help='Number of attempts to check the RackConnect '
                              'status.  Defaults to 10.')
     parser.add_argument('-i',
                         '--interval',
                         type=int,
                         default=60,
+                        metavar='X',
                         help='Number of seconds to wait between attempts.  '
                              'Defaults to 60.')
     parser.add_argument('-d',
