@@ -144,7 +144,7 @@ def handle_args():
     parser.add_argument('-d',
                         '--debug',
                         action='store_true',
-                        help='')
+                        help='Enable output on standard out.')
     # parse the arguments to create args object
     args = parser.parse_args()
     return args
