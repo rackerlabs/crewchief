@@ -38,7 +38,7 @@ else:
 
 setuptools.setup(
     name='crewchief',
-    version='0.4',
+    version='0.5',
     description=('Launch scripts after Rackconnect automation is complete.'),
     author='Carl George',
     author_email='carl.george@rackspace.com',

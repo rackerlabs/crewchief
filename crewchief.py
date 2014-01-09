@@ -121,7 +121,7 @@ def handle_args():
     # set main program variables
     the_name = 'crewchief'
     the_description = 'Launch scripts after RackConnect automation is complete.'
-    the_version = '%(prog)s 0.4'
+    the_version = '%(prog)s 0.5'
     # create our parser object
     parser = argparse.ArgumentParser(prog=the_name,
                                      description=the_description)
