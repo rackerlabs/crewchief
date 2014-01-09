@@ -4,7 +4,7 @@ Launch scripts after RackConnect automation is complete on a Linux cloud server.
 
 ## Installation
 
-Currently only Red Hat 6, CentOS 6, and Ubuntu are supported.  There is also experiemental support for systemd.
+Currently only Red Hat 6, CentOS 6, and Ubuntu are supported.  There is also experimental support for systemd.
 
 stable
 
