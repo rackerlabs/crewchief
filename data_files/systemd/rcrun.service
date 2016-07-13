@@ -1,12 +1,12 @@
 [Unit]
-Description=Rackconnect Crewchief
+Description=rcrun
 Requires=proc-xen.mount
 After=proc-xen.mount
 
 [Service]
 Type=oneshot
 RemainAfterExit=yes
-ExecStart=crewchief
+ExecStart=rcrun
 
 [Install]
 WantedBy=multi-user.target

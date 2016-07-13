@@ -55,9 +55,9 @@ def call_tasks(tasks, args):
 
 
 def get_tasks():
-    ''' Obtain the list of tasks from /etc/crewchief.d '''
+    ''' Obtain the list of tasks from /etc/rcrun.d '''
     # set the tasks directory
-    tasks_dir = '/etc/crewchief.d'
+    tasks_dir = '/etc/rcrun.d'
     # create a list of all the files in that directory
     tasks = glob.glob('{0}/*'.format(tasks_dir))
     # sort the tasks to honor numbered order (00-foo, 01-bar, etc.)
@@ -119,9 +119,9 @@ def control(args):
 def handle_args():
     ''' Process command line flags. '''
     # set main program variables
-    the_name = 'crewchief'
+    the_name = 'rcrun'
     the_description = 'Launch scripts after RackConnect automation is complete.'
-    the_version = '%(prog)s 0.5'
+    the_version = '%(prog)s 2.0'
     # create our parser object
     parser = argparse.ArgumentParser(prog=the_name,
                                      description=the_description)
@@ -154,7 +154,7 @@ def handle_args():
 
 def main():
     # set the ident for syslog
-    syslog.openlog('crewchief')
+    syslog.openlog('rcrun')
     args = handle_args()
     if control(args):
         tasks = get_tasks()

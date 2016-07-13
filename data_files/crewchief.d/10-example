@@ -1,8 +1,0 @@
-#!/bin/bash
-
-# Define your tasks as shell scripts under /etc/crewchief.d. You can
-# enable/disable tasks by changing the executable flag. Once RackConnect
-# automation is complete, crewchief will run all executable tasks. All
-# events are logged in syslog.
-
-echo 'Hello world!'
